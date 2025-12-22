@@ -14,8 +14,6 @@ RUN go mod download
 
 # Copy source
 COPY . .
-# Debug: List files to verify context
-RUN ls -R /app
 
 # Build binary
 # -ldflags="-s -w" strips debug information -> smaller binary
