@@ -37,6 +37,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create directory on server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: mkdir -p ~/webhook-proxy-go
+
       - name: Copy docker-compose to server
         uses: appleboy/scp-action@master
         with:
@@ -44,7 +52,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "docker-compose.prod.yml"
-          target: "~/webhook-proxy-go"
+          target: "~/webhook-proxy-go/docker-compose.prod.yml"
 
       - name: Deploy to server
         uses: appleboy/ssh-action@master
