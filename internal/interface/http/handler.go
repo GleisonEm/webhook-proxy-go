@@ -32,10 +32,10 @@ func (h *Handler) RegisterRoutes(app *fiber.App) {
 }
 
 func (h *Handler) HandleWebhook(c *fiber.Ctx) error {
-	// // Skip health/ready just in case (though route order handles it)
-	// if c.Path() == "/health" || c.Path() == "/ready" {
-	// 	return c.Next()
-	// }
+	// Skip health/ready just in case (though route order handles it)
+	if c.Path() == "/health" || c.Path() == "/ready" {
+		return c.Next()
+	}
 
 	var payload interface{}
 	if err := c.BodyParser(&payload); err != nil {

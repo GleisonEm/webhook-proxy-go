@@ -1,0 +1,46 @@
+services:
+  app:
+    # REPLACEME: Replace 'YOUR_DOCKERHUB_USERNAME' with your actual Docker Hub username
+    image: ${DOCKER_USERNAME:-gleisonem}/webhook-proxy-go:latest
+    container_name: webhook-proxy # Optional: removed if using replicas, but for single instance it's fine. 
+    # If scaling, comment out container_name.
+    restart: always
+    environment:
+      - APP_SERVER_PORT=${APP_SERVER_PORT:-8095}
+      - APP_SERVER_DESTINATION_URL=${APP_SERVER_DESTINATION_URL}
+      - APP_NATS_URL=nats://nats:4222
+      - APP_NATS_MAX_RETRIES=${APP_NATS_MAX_RETRIES:-5}
+      - APP_NATS_ACK_WAIT_SECONDS=${APP_NATS_ACK_WAIT_SECONDS:-30}
+      - APP_NATS_CONCURRENCY=${APP_NATS_CONCURRENCY:-10}
+      - APP_NATS_RETRY_BACKOFF_SECONDS=${APP_NATS_RETRY_BACKOFF_SECONDS:-3}
+      - APP_NATS_RETRY_BACKOFF_MULTIPLIER=${APP_NATS_RETRY_BACKOFF_MULTIPLIER:-2.0}
+      - APP_LOG_LEVEL=${APP_LOG_LEVEL:-info}
+      - APP_LOG_APP_NAME=${APP_LOG_APP_NAME:-webhook-proxy}
+      - APP_LOG_ENCODING=${APP_LOG_ENCODING:-json}
+      - APP_LOG_LOKI_URL=${APP_LOG_LOKI_URL}
+    ports:
+      - "127.0.0.1:${APP_SERVER_PORT:-8095}:8095"
+    depends_on:
+      nats:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8095/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  nats:
+    image: nats:2.10-alpine
+    container_name: webhook-nats
+    restart: always
+    command: "-js -m 8222"
+    ports:
+      - "127.0.0.1:4222:4222"
+      - "127.0.0.1:8222:8222"
+    volumes:
+      - ./nats-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:8222/varz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
