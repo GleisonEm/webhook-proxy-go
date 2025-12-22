@@ -52,7 +52,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: "docker-compose.prod.yml"
-          target: "~/webhook-proxy-go/docker-compose.prod.yml"
+          target: "~/webhook-proxy-go/"
 
       - name: Deploy to server
         uses: appleboy/ssh-action@master
