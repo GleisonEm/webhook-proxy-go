@@ -28,7 +28,7 @@ func (h *Handler) RegisterRoutes(app *fiber.App) {
 	app.Get("/ready", h.HealthCheck)
 
 	// Catch-all for webhooks
-	app.Post("/process/heyboy/*", h.HandleWebhook)
+	app.Post("/*", h.HandleWebhook)
 }
 
 func (h *Handler) HandleWebhook(c *fiber.Ctx) error {
