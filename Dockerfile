@@ -17,7 +17,7 @@ COPY . .
 
 # Build binary
 # -ldflags="-s -w" strips debug information -> smaller binary
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o server ./cmd/server
 
 # Runtime Stage - SCATCH (Empty image, smallest possible)
 FROM scratch
