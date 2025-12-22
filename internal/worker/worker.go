@@ -200,9 +200,8 @@ func (p *Processor) processMessage(msg jetstream.Msg) {
 				zap.Float64("total_duration_ms", float64(totalDuration.Nanoseconds())/1e6),
 				zap.String("destination", finalURL),
 			)
-			msg.Ack()
 			success = true
-			break // Stop on first success
+			// Broadcast behavior: Continue to next URL
 		} else {
 			p.Log.Error("Destination returned error",
 				zap.String("webhook_id", payload.ID),
@@ -216,6 +215,7 @@ func (p *Processor) processMessage(msg jetstream.Msg) {
 	}
 
 	if success {
+		msg.Ack()
 		return
 	}
 

@@ -66,5 +66,8 @@ jobs:
             echo "Pulling latest image..."
             docker compose -f docker-compose.prod.yml pull
             echo "Restarting services..."
-            docker compose -f docker-compose.prod.yml up -d
+            # Ensure proper update with recreate to pick up new image
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
             echo "Deployment successful!"
+            # Optional: Prune old images to save space
+            docker image prune -f
