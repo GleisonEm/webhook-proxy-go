@@ -5,7 +5,7 @@ services:
     restart: always
     deploy:
       mode: replicated
-      replicas: 2 # Scale workers for high availability/throughput
+      replicas: 1 # Back to 1 to avoid port 8095 conflict
     environment:
       - APP_SERVER_PORT=${APP_SERVER_PORT:-8095}
       - APP_SERVER_DESTINATION_URL=${APP_SERVER_DESTINATION_URL}
