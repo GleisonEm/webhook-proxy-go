@@ -63,7 +63,7 @@ jobs:
           script: |
             cd ~/webhook-proxy-go
             echo "Pulling latest image..."
-            docker-compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml pull
             echo "Restarting services..."
-            docker-compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml up -d
             echo "Deployment successful!"
