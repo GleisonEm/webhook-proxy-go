@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    container_name: webhook-proxy
+    # container_name: webhook-proxy # Removed to allow replicas (scaling)
     restart: always
     deploy:
       mode: replicated
@@ -52,3 +52,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+
+volumes:
+  nats-data:
