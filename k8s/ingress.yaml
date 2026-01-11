@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webhook-proxy
+  annotations:
+    # Traefik is the default ingress controller in K3s
+    kubernetes.io/ingress.class: "traefik"
+spec:
+  rules:
+    # No host specified matches all incoming HTTP traffic on port 80
+    # If you have a domain, uncomment and update the lines below:
+    # - host: example.com
+    #   http:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: webhook-proxy
+                port:
+                  number: 80

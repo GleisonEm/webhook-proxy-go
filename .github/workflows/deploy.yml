@@ -38,36 +38,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create directory on server
-        uses: appleboy/ssh-action@master
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: mkdir -p ~/webhook-proxy-go
+          version: "latest"
 
-      - name: Copy docker-compose to server
-        uses: appleboy/scp-action@master
+      - name: Set Kubeconfig
+        uses: azure/k8s-set-context@v3
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker-compose.prod.yml"
-          target: "~/webhook-proxy-go/"
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
 
-      - name: Deploy to server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ~/webhook-proxy-go
-            echo "Pulling latest image..."
-            docker compose -f docker-compose.prod.yml pull
-            echo "Restarting services..."
-            # Ensure proper update with recreate to pick up new image
-            docker compose -f docker-compose.prod.yml up -d --force-recreate
-            echo "Deployment successful!"
-            # Optional: Prune old images to save space
-            docker image prune -f
+      - name: Deploy to K3s
+        run: |
+          echo "Applying manifests..."
+          kubectl apply -f k8s/
+
+          echo "Triggering rollout restart..."
+          kubectl rollout restart deployment/webhook-proxy
+
+          echo "Waiting for rollout to complete..."
+          kubectl rollout status deployment/webhook-proxy
