@@ -2,13 +2,15 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: webhook-proxy
-  # annotations:
-  # kubernetes.io/ingress.class: "traefik" # Deprecated
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: traefik
+  tls:
+    - hosts:
+        - webhook-proxy-prod.heyboy.com.br
+      secretName: webhook-proxy-prod-tls
   rules:
-    # No host specified matches all incoming HTTP traffic on port 80
-    # If you have a domain, uncomment and update the lines below:
     # Substitua pelo seu domínio real (ex: api.seudominio.com)
     - host: webhook-proxy-prod.heyboy.com.br
       http:
