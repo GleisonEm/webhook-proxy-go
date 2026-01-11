@@ -21,15 +21,15 @@ spec:
           ports:
             - containerPort: 8095
               name: http
+          envFrom:
+            - secretRef:
+                name: webhook-proxy-env
+          # Variáveis que não são sensíveis ou padrão podem ficar aqui,
+          # mas se estiverem na Secret, a Secret tem prioridade se montada de outra forma,
+          # mas envFrom mescla tudo. Vamos preferir tudo na Secret para centralizar.
           env:
             - name: APP_SERVER_PORT
-              value: "8095"
-            - name: APP_NATS_URL
-              value: "nats://nats:4222" # Connecting to the NATS service
-            - name: APP_NATS_MAX_RETRIES
-              value: "5"
-            - name: APP_LOG_LEVEL
-              value: "info"
+              value: "8095" # Porta interna do container precisa bater com a livenessProbe
           livenessProbe:
             httpGet:
               path: /health
