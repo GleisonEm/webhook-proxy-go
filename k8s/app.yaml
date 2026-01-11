@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: gleisonem/webhook-proxy-go:latest # Replace with your dockerhub username if different
+          image: gemanueldev/webhook-proxy-go:latest # Replace with your dockerhub username if different
           imagePullPolicy: Always
           ports:
             - containerPort: 8095
