@@ -54,7 +54,7 @@ jobs:
         with:
           version: "latest"
 
-      - name: Deploy to K3s (Helm)
+      - name: Deploy to K3ss (Helm)
         run: |
           echo "Deploying Production using Helm..."
           helm upgrade --install webhook-proxy-prod ./infra/helm/charts/webhook-proxy \
