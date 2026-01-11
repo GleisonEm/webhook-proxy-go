@@ -1,0 +1,33 @@
+# Default values for webhook-proxy.
+
+replicaCount: 1
+
+image:
+  repository: gemanueldev/webhook-proxy-go
+  pullPolicy: Always
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - host: webhook-proxy.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: webhook-proxy-tls
+      hosts:
+        - webhook-proxy.local
+
+nats:
+  storageSize: 1Gi
+  image: nats:2.10-alpine
+
+envSecretName: webhook-proxy-env

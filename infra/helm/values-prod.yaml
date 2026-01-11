@@ -1,0 +1,15 @@
+# Production values for webhook-proxy
+replicaCount: 3
+
+ingress:
+  hosts:
+    - host: webhook-proxy-prod.heyboy.com.br
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: webhook-proxy-prod-tls
+      hosts:
+        - webhook-proxy-prod.heyboy.com.br
+
+envSecretName: webhook-proxy-env

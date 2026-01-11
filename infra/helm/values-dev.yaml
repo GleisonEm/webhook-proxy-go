@@ -1,0 +1,15 @@
+# Development values for webhook-proxy
+replicaCount: 1
+
+ingress:
+  hosts:
+    - host: webhook-proxy-dev.heyboy.com.br
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: webhook-proxy-dev-tls
+      hosts:
+        - webhook-proxy-dev.heyboy.com.br
+
+envSecretName: webhook-proxy-env

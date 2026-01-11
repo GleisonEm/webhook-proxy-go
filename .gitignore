@@ -1,3 +1,5 @@
 .env
+.env.dev
+.env.prod
 /server
 nginx_snippet.conf

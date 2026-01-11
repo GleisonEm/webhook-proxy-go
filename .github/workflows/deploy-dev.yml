@@ -1,9 +1,8 @@
-name: Build and Push Docker Image
+name: Build and Deploy DEV
 
 on:
   push:
-    branches: ["master"]
-    tags: ["v*"]
+    branches: ["develop"]
 
 jobs:
   build:
@@ -29,7 +28,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/webhook-proxy-go:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/webhook-proxy-go:dev
 
   deploy:
     needs: build
@@ -54,13 +53,13 @@ jobs:
         with:
           version: "latest"
 
-      - name: Deploy to K3s (Helm)
+      - name: Deploy to K3s (Helm DEV)
         run: |
-          echo "Deploying Production using Helm..."
-          helm upgrade --install webhook-proxy-prod ./infra/helm/charts/webhook-proxy \
-            --namespace prod \
+          echo "Deploying Development using Helm..."
+          helm upgrade --install webhook-proxy-dev ./infra/helm/charts/webhook-proxy \
+            --namespace dev \
             --create-namespace \
-            -f ./infra/helm/values-prod.yaml \
-            --set image.tag=latest \
+            -f ./infra/helm/values-dev.yaml \
+            --set image.tag=dev \
             --wait \
             --timeout 5m

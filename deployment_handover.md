@@ -11,48 +11,32 @@ This document describes the deployment standard used for the backend, to be repl
 - **Container Registry**: Docker Hub (Public/Private)
 - **CI/CD**: GitHub Actions -> `kubectl apply`
 
-## 1. Kubernetes Manifests Structure
+## 1. Structure: Helm Chart
 
-Create a folder `k8s/` in the root of the repository.
+The manifests are no longer static. They live in `infra/helm/charts/webhook-proxy/templates/`.
 
-### `k8s/app.yaml` (Deployment & Service)
+- **`infra/helm/values.yaml`**: Default values (inside chart).
+- **`infra/helm/values-prod.yaml`**: Overrides for Production (e.g., 3 replicas, prod domain).
+- **`infra/helm/values-dev.yaml`**: Overrides for Development (e.g., 1 replica, dev domain).
 
-- **Deployment**:
-  - Replicas: 1 (for now).
-  - ImagePullPolicy: `Always`.
-  - **Liveness/Readiness Probes**: Essential for zero-downtime deployments.
-  - **EnvVars**: Use `envFrom: secretRef` to load sensitive data from a manually created Secret on the server.
+- **Liveness/Readiness Probes**: Essential for zero-downtime deployments.
+- **EnvVars**: Use `envFrom: secretRef` to load sensitive data from a manually created Secret on the server.
 - **Service**:
   - Type: `ClusterIP` (Internal only).
   - Port 80 targets the container port.
 
-### `k8s/ingress.yaml` (Ingress)
-
-- **ClassName**: `ingressClassName: traefik`.
-- **Annotations**: `cert-manager.io/cluster-issuer: letsencrypt-prod` (to auto-issue SSL).
-- **TLS**:
-  ```yaml
-  tls:
-    - hosts:
-        - your.domain.com
-      secretName: your-app-tls
-  ```
-- **Host**: Define the specific domain.
-
 ## 2. Secrets Management
 
-**DO NOT** commit `.env` files or hardcoded secrets.
+**DO NOT** commit `.env` files.
 
-1.  **On the Server**: Create a Kubernetes Secret manually.
+1.  **On the Server**: Create the Secret using an `.env` file locally:
     ```bash
-    kubectl create secret generic <service-name>-env --from-literal=KEY=VALUE ...
+    kubectl create secret generic <service-name>-env \
+      --namespace <namespace> \
+      --from-env-file=.env \
+      --dry-run=client -o yaml | kubectl apply -f -
     ```
-2.  **In `k8s/app.yaml`**: Reference it.
-    ```yaml
-    envFrom:
-      - secretRef:
-          name: <service-name>-env
-    ```
+2.  **Reference in values**: Use the variable `envSecretName: <service-name>-env`.
 
 ## 3. CI/CD Workflow (`.github/workflows/deploy.yml`)
 
@@ -72,16 +56,22 @@ The pipeline does NOT use SSH to run docker-compose. It uses `kubectl`.
 4.  **Install kubectl** (using `azure/setup-kubectl`).
 5.  **Set Kubeconfig** (using `azure/k8s-set-context`).
 6.  **Deploy**:
-    ```bash
-    kubectl apply -f k8s/
-    kubectl rollout restart deployment/<deployment-name>
-    kubectl rollout status deployment/<deployment-name>
-    ```
+    **Command:**
 
-## 4. Debugging (Cheat Sheet)
+```bash
+helm upgrade --install <release-name> ./infra/helm/charts/webhook-proxy \
+  -f ./infra/helm/values-<env>.yaml \
+  --set image.tag=latest \
+  --wait
+```
 
-If the deployment fails:
+## 4. How to Deploy a New Environment locally
 
-- **Check Pod Status**: `kubectl get pods`
+To test a deploy for "dev" manually:
+
+```bash
+helm upgrade --install webhook-proxy-dev ./infra/helm/charts/webhook-proxy -f ./infra/helm/values-dev.yaml
+```
+
 - **Inspect Start Errors**: `kubectl describe pod <pod-name>` (Look at "Events" at the bottom).
 - **View Logs**: `kubectl logs -l app=<app-label> -f`
