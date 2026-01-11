@@ -1,27 +1,30 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: { { include "webhook-proxy.fullname" . } }
-  labels: { { - include "webhook-proxy.labels" . | nindent 4 } }
+  name: {{ include "webhook-proxy.fullname" . | quote }}
+  labels:
+    {{- include "webhook-proxy.labels" . | nindent 4 }}
 spec:
-  replicas: { { .Values.replicaCount } }
+  replicas: {{ .Values.replicaCount }}
   selector:
-    matchLabels: { { - include "webhook-proxy.selectorLabels" . | nindent 6 } }
+    matchLabels:
+      {{- include "webhook-proxy.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      labels: { { - include "webhook-proxy.selectorLabels" . | nindent 8 } }
+      labels:
+        {{- include "webhook-proxy.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - name: { { .Chart.Name } }
+        - name: {{ .Chart.Name | quote }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: { { .Values.image.pullPolicy } }
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
               containerPort: 8095
               protocol: TCP
           envFrom:
             - secretRef:
-                name: { { .Values.envSecretName } }
+                name: {{ .Values.envSecretName | quote }}
           livenessProbe:
             httpGet:
               path: /health

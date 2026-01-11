@@ -2,7 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: nats
-  labels: { { - include "webhook-proxy.labels" . | nindent 4 } }
+  labels:
+    {{- include "webhook-proxy.labels" . | nindent 4 }}
 spec:
   ports:
     - port: 4222
@@ -30,7 +31,7 @@ spec:
     spec:
       containers:
         - name: nats
-          image: { { .Values.nats.image } }
+          image: {{ .Values.nats.image | quote }}
           command: ["nats-server", "-js", "-m", "8222"]
           ports:
             - containerPort: 4222
@@ -47,4 +48,4 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: { { .Values.nats.storageSize } }
+            storage: {{ .Values.nats.storageSize | quote }}
